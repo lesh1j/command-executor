@@ -9,47 +9,68 @@ import { ICommandFfmpeg, IFfmpegInput } from "./ffmpeg.types.";
 import { StramHandler } from "../../core/handlers/stream.handler.js";
 
 export class FffmpegExecutor extends CommandExecutor<IFfmpegInput> {
-  private fileService: FileService = new FileService();
-  private promptService: PromptServise = new PromptServise();
-  private ffmpegBuilder: FfmpegBuilder = new FfmpegBuilder();
+   private fileService: FileService = new FileService();
+   private promptService: PromptServise = new PromptServise();
+   private ffmpegBuilder: FfmpegBuilder = new FfmpegBuilder();
 
-  constructor(logger: Ilogger) {
-    super(logger);
-  }
+   constructor(logger: Ilogger) {
+      super(logger);
+      ss;
+   }
 
-  protected async prompt(): Promise<IFfmpegInput> {
-    const width = await this.promptService.input<number>("Width", PromptTypes.NUMBER);
-    const height = await this.promptService.input<number>("Height", PromptTypes.NUMBER);
-    const path = await this.promptService.input<string>("Path", PromptTypes.INPUT);
-    const name = await this.promptService.input<string>("Name", PromptTypes.INPUT);
+   protected async prompt(): Promise<IFfmpegInput> {
+      const width = await this.promptService.input<number>(
+         "Width",
+         PromptTypes.NUMBER
+      );
+      const height = await this.promptService.input<number>(
+         "Height",
+         PromptTypes.NUMBER
+      );
+      const path = await this.promptService.input<string>(
+         "Path",
+         PromptTypes.INPUT
+      );
+      const name = await this.promptService.input<string>(
+         "Name",
+         PromptTypes.INPUT
+      );
 
-    return { width, height, path, name };
-  }
+      return { width, height, path, name };
+   }
 
-  protected build({ width, height, path, name }: IFfmpegInput): ICommandFfmpeg {
-    const output = this.fileService.getFilePatch(path, name, "mp4");
+   protected build({
+      width,
+      height,
+      path,
+      name,
+   }: IFfmpegInput): ICommandFfmpeg {
+      const output = this.fileService.getFilePatch(path, name, "mp4");
 
-    const args = this.ffmpegBuilder
-      .seInput(path)
-      .setSize(width, height)
-      .setOutput(output)
-      .build();
+      const args = this.ffmpegBuilder
+         .seInput(path)
+         .setSize(width, height)
+         .setOutput(output)
+         .build();
 
-    return { command: "ffmpeg", args, output };
-  }
+      return { command: "ffmpeg", args, output };
+   }
 
-  protected spawn({
-    command,
-    args,
-    output,
-  }: ICommandFfmpeg): ChildProcessWithoutNullStreams {
-    this.fileService.deleteFileIfExist(output);
+   protected spawn({
+      command,
+      args,
+      output,
+   }: ICommandFfmpeg): ChildProcessWithoutNullStreams {
+      this.fileService.deleteFileIfExist(output);
 
-    return spawn(command, args);
-  }
+      return spawn(command, args);
+   }
 
-  protected processStream(stream: ChildProcessWithoutNullStreams, logger: Ilogger): void {
-    const handler = new StramHandler(logger);
-    handler.processOutput(stream);
-  }
+   protected processStream(
+      stream: ChildProcessWithoutNullStreams,
+      logger: Ilogger
+   ): void {
+      const handler = new StramHandler(logger);
+      handler.processOutput(stream);
+   }
 }
